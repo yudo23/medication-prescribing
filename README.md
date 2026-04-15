@@ -95,7 +95,7 @@ http://localhost:8000
 
 ## Fitur Utama
 - Manajemen Pemeriksaan Pasien (Tagihan)  
-- Manajemen Pembayaran
+- Manajemen Pembayaran (Resep Dokter)
 - Pengguna (Admin, Dokter, Apoteker)
 - Log Pengguna
 - Dashboard statistik  
