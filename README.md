@@ -28,7 +28,7 @@ https://docs.google.com/document/d/1Y7FyjJvZn_p_WneuR8-reMHvckFrc1XwofMshhh_JTU/
 
 ## Instalasi
 
-### 1. Install Dependency Backend
+### 1. Install Dependency
 ```bash
 composer install
 ```
