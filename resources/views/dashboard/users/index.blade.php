@@ -51,6 +51,7 @@
                                         <th>Aksi</th>
                                         <th>No</th>
                                         <th>Nama</th>
+                                        <th>Username</th>
                                         <th>Email</th>
                                         <th>Role</th>
                                         <th>Status</th>
@@ -84,6 +85,7 @@
                                             </td>
                                             <td>{{$table->firstItem() + $index}}</td>
                                             <td>{{$row->name}}</td>
+                                            <td>{{$row->username}}</td>
                                             <td>{{$row->email}}</td>
                                             <td>{{$row->getRoleNames()->implode(', ') }}</td>
                                             <td>

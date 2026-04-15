@@ -36,6 +36,9 @@
                                     <input type="date" class="form-control" name="examined_date" placeholder="Tanggal Periksa" value="{{$result->examined_date}}" required>
                                 </div>
                             </div>
+                            @if(Auth::user()->hasRole([
+                                \App\Enums\RoleEnum::ADMINISTRATOR,
+                            ]))
                             <div class="form-group row">
                                 <label class="col-md-2 col-form-label">Dokter<span class="text-danger">*</span></label>
                                 <div class="col-md-10">
@@ -47,6 +50,7 @@
                                     </select>
                                 </div>
                             </div>
+                            @endif
                             <div class="form-group row">
                                 <label class="col-md-2 col-form-label">Nama Pasien <span class="text-danger">*</span></label>
                                 <div class="col-md-10">

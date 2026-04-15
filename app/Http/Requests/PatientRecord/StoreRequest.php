@@ -7,9 +7,21 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Exceptions\CustomValidationException;
 use Illuminate\Validation\Rule;
+use Auth;
 
 class StoreRequest extends FormRequest
 {
+    public function prepareForValidation()
+    {
+        $data = [];
+
+        if(Auth::user()->hasRole([RoleEnum::DOKTER])){
+            $data["doctor_id"] = Auth::user()->id;
+        }
+
+        $this->merge($data);
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -18,6 +30,10 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'doctor_id' => [
+                'required',
+                Rule::exists("users","id")
+            ],
             'name' => [
                 'required',
             ],
@@ -98,6 +114,8 @@ class StoreRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'doctor_id.required' => 'Dokter wajib diisi',
+            'doctor_id.exists' => 'Dokter tidak ditemukan',
             'name.required' => 'Nama pasien wajib diisi',
             'nik.required' => 'NIK pasien wajib diisi',
             'nik.numeric' => 'NIK pasien harus berupa angka',

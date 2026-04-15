@@ -39,6 +39,7 @@
                     <div class="col-lg-12 action">
                          @if(Auth::user()->hasRole([
                             \App\Enums\RoleEnum::ADMINISTRATOR,
+                            \App\Enums\RoleEnum::DOKTER,
                         ]))
                         <a href="{{route('dashboard.patient-records.create')}}" class="btn btn-primary btn-sm btn-add"><i class="fa fa-plus"></i> Tambah</a>
                         @endif

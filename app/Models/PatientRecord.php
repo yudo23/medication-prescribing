@@ -133,9 +133,12 @@ class PatientRecord extends Model
             return true;
         }
 
-        if($this->status == PatientRecordEnum::STATUS_UNPAID){
-            return true;
+        if(Auth::user()->hasRole([RoleEnum::DOKTER])){
+            if($this->status == PatientRecordEnum::STATUS_UNPAID){
+                return true;
+            }
         }
+
         return false;
     }
 
@@ -144,9 +147,12 @@ class PatientRecord extends Model
             return true;
         }
         
-        if($this->status == PatientRecordEnum::STATUS_UNPAID){
-            return true;
+        if(Auth::user()->hasRole([RoleEnum::DOKTER])){
+            if($this->status == PatientRecordEnum::STATUS_UNPAID){
+                return true;
+            }
         }
+
         return false;
     }
 

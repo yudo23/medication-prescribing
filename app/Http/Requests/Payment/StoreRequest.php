@@ -21,6 +21,7 @@ class StoreRequest extends FormRequest
 
         $this->merge($data);
     }
+    
     public function authorize(): bool
     {
         return true;

@@ -77,7 +77,7 @@
                                                         @if($row->canDelete())
                                                         <a href="#" class="dropdown-item btn-delete" data-id="{{$row->id}}"><i class="fa fa-trash"></i> Hapus</a>
                                                         @endif
-                                                        @if($row->canDelete())
+                                                        @if($row->canPrintReceipt())
                                                         <a href="{{route('dashboard.payments.print-receipt',$row->id)}}"  class="dropdown-item"><i class="fa fa-print"></i> Cetak Kwitansi</a>
                                                         @endif
                                                     </div>

@@ -36,12 +36,14 @@
                     </a>
                 </li>   
 
+                @if(Auth::user()->hasRole([\App\Enums\RoleEnum::ADMINISTRATOR]))
                 <li>
                     <a href="{{route('dashboard.users.index')}}" class="waves-effect">
                         <i class="fa fa-users"></i>
                         <span> Pengguna</span>
                     </a>
-                </li>                
+                </li>
+                @endif              
 
                 @if(Auth::user()->hasRole([\App\Enums\RoleEnum::ADMINISTRATOR]))
                 <li class="has_sub">

@@ -49,12 +49,6 @@
                             <input type="email" class="form-control" placeholder="Email" value="{{ old('email', $result->email) }}" name="email">
                         </div>
                     </div>
-                    <div class="form-group row mb-3">
-                        <label class="col-md-3 col-form-label">Nomor Telepon <span class="text-danger">*</span></label>
-                        <div class="col-md-9">
-                            <input type="number" class="form-control" placeholder="Nomor Telepon" value="{{ old('phone', $result->phone) }}" name="phone">
-                        </div>
-                    </div>
                     <button type="submit" class="btn btn-primary">
                         Ubah Profil
                     </button>
