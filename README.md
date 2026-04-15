@@ -98,11 +98,10 @@ http://localhost:8000
 ---
 
 ## Fitur Utama
-- Manajemen pemeriksaan pasien  
-- Input hasil diagnosa dokter  
-- Resep obat  
-- Proses pembayaran  
-- Role management (Admin, Dokter, Apoteker)  
+- Manajemen Pemeriksaan Pasien (Tagihan)  
+- Manajemen Pembayaran
+- Pengguna (Admin, Dokter, Apoteker)
+- Log Pengguna
 - Dashboard statistik  
 
 ---
