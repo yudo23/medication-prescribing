@@ -39,7 +39,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-### 3. Konfigurasi Database
+### 3. Konfigurasi Database (Pastikan database sudah dibuat sebelumnya)
 Edit file `.env`:
 
 ```env
@@ -49,11 +49,6 @@ DB_PORT=3306
 DB_DATABASE=medication-prescribing
 DB_USERNAME=root
 DB_PASSWORD=
-```
-
-> Pastikan database sudah dibuat:
-```sql
-CREATE DATABASE medication-prescribing;
 ```
 
 ### 4. Migrasi dan Seeder
