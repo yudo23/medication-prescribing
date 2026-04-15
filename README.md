@@ -19,6 +19,13 @@ cd medication-prescribing
 
 ---
 
+---
+
+## Dokumentsai
+https://docs.google.com/document/d/1Y7FyjJvZn_p_WneuR8-reMHvckFrc1XwofMshhh_JTU/edit?usp=sharing
+
+---
+
 ## Instalasi
 
 ### 1. Install Dependency Backend
