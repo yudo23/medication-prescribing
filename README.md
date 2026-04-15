@@ -112,5 +112,5 @@ php artisan optimize:clear
 
 ## Catatan
 - Gunakan PHP versi >= 8.3  
-- Pastikan MySQL dan Node.js berjalan  
+- Pastikan MySQL berjalan  
 - Gunakan browser modern (Chrome / Edge)  
