@@ -2,8 +2,7 @@
 
     <div class="topbar-left	d-none d-lg-block">
         <div class="text-center">
-
-            <a href="{{route('dashboard.index')}}" class="logo"><img src="{{URL::to('/')}}/templates/dashboard/assets/images/logo.png" height="20" alt="logo"></a>
+            <a href="{{route('dashboard.index')}}" class="logo text-white">{{Auth::user()->getRoleNames()->implode(', ') }}</a>
         </div>
     </div>
 

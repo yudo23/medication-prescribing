@@ -63,8 +63,14 @@
                                     <select class="form-control" name="gender" required>
                                         <option value="">==Pilih Jenis Kelamin==</option>
                                         <option value="L">Laki-Laki</option>
-                                        <option value="L">Perempuan</option>
+                                        <option value="P">Perempuan</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2 col-form-label">Tanggal Lahir <span class="text-danger">*</span></label>
+                                <div class="col-md-10">
+                                    <input type="date" class="form-control" name="date_of_birth" placeholder="Tanggal Lahir" required>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -100,7 +106,7 @@
                             <div class="form-group row">
                                 <label class="col-md-2 col-form-label">Respiration Rate</label>
                                 <div class="col-md-10">
-                                    <input type="number" class="form-control" name="heart_rate" placeholder="Respiration Rate">
+                                    <input type="number" class="form-control" name="respiration_rate" placeholder="Respiration Rate">
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -137,27 +143,31 @@
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
-                                        <tr>
-                                            <th style="width: 5%;">No</th>
-                                            <th style="width: 50%;">Obat</th>
-                                            <th style="width: 20%">Harga</th>
-                                            <th style="width: 20%">Jumlah</th>
-                                            <th style="width: 5%">Aksi</th>
-                                        </tr>
+                                        <th style="width: 5%;">No</th>
+                                        <th style="width: 50%;">Obat <span class="text-danger">*</span></th>
+                                        <th style="width: 15%">Harga <span class="text-danger">*</span></th>
+                                        <th style="width: 15%">Jumlah <span class="text-danger">*</span></th>
+                                        <th style="width: 10%">Keterangan</th>
+                                        <th style="width: 5%">Aksi</th>
                                     </thead>
                                     <tbody class="tbody-repeater">
                                         <tr class="repeater">
+                                            <input type="hidden" class="form-control medicine_name" name="repeater[0][medicine_name]">
+                                             <input type="hidden" class="form-control price" name="repeater[0][price]">
                                             <td class="number">1</td>
                                             <td>
-                                                <select class="form-control select-medicine" name="repeater[0][medicine_id]">
+                                                <select class="form-control select-medicine medicine_id" name="repeater[0][medicine_id]">
                                                     <option value="">==Pilih Obat==</option>
                                                 </select>
                                             </td>
                                             <td>
-                                                <input type="number" class="form-control price" name="repeater[0][price]" readonly>
+                                                <input type="text" class="form-control price-readonly" readonly>
                                             </td>
                                             <td>
                                                 <input type="number" class="form-control qty" name="repeater[0][qty]">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control note" name="repeater[0][note]">
                                             </td>
                                             <td></td>
                                         </tr>
@@ -205,20 +215,35 @@
             }
         });
 
+        $(document).on('change', '.select-medicine', function() {
+            let medicine_id = $(this).val();
+            let row = $(this).closest('tr');
+
+            let text = $(this).find('option:selected').text();
+            row.find('.medicine_name').val(text);
+
+            getPrice(medicine_id, row);
+        });
+
         $(document).on("click",".btn-add-medicine",function(e){
             e.preventDefault();
 
             let html = `
                 <tr class="repeater">
+                    <input type="hidden" class="form-control medicine_name" name="repeater[0][medicine_name]">
+                    <input type="hidden" class="form-control price" name="repeater[0][price]">
                     <td class="number"></td>
                     <td>
-                        <select class="form-control select-medicine" name="repeater[0][medicine_id]"></select>
+                        <select class="form-control select-medicine medicine_id" name="repeater[0][medicine_id]"></select>
                     </td>
                     <td>
-                        <input type="number" class="form-control price" name="repeater[0][price]" readonly>
+                        <input type="text" class="form-control price-readonly" name="repeater[0][price]" readonly>
                     </td>
                     <td>
                         <input type="number" class="form-control qty" name="repeater[0][qty]">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control note" name="repeater[0][note]">
                     </td>
                     <td>
                         <a class="btn btn-sm btn-remove-medicine text-danger"><i class="fa fa-trash"></i></a>
@@ -233,7 +258,7 @@
             sortTableMedicine();
         });
 
-        $(document).on("click",".btn-add-medicine",function(e){
+        $(document).on("click",".btn-remove-medicine",function(e){
             e.preventDefault();
             $(this).parent().parent().remove();
             sortTableMedicine();
@@ -279,9 +304,11 @@
         function sortTableMedicine(){
             $('.repeater').each(function(index,element){
                 $('.repeater').eq(index).find('.number').html(index+1);
-                $('.repeater').eq(index).find('.select-medicine').attr('name',`repeater[${index}][medicine_id]`);
+                $('.repeater').eq(index).find('.medicine_name').attr('name',`repeater[${index}][medicine_name]`);
+                $('.repeater').eq(index).find('.medicine_id').attr('name',`repeater[${index}][medicine_id]`);
                 $('.repeater').eq(index).find('.price').attr('name',`repeater[${index}][price]`);
                 $('.repeater').eq(index).find('.qty').attr('name',`repeater[${index}][qty]`);
+                $('.repeater').eq(index).find('.note').attr('name',`repeater[${index}][note]`);
             });
         }
 
@@ -304,6 +331,46 @@
                     }
                 }
             });
+        }
+
+        function getPrice(medicine_id, row){
+            let examined_date = $('input[name="examined_date"]').val();
+
+            if(medicine_id && examined_date){
+                $.ajax({
+                    url: '{{route("api.medicines.price","_id_")}}'.replace("_id_", medicine_id),
+                    method: "GET",
+                    data : {
+                        examined_date : examined_date,
+                    },
+                    dataType: "JSON",
+                    beforeSend: function() {
+                        return openLoader();
+                    },
+                    success: function(resp) {
+                        if (resp.success == false) {
+                            return responseFailed(resp.message);
+                        } else {
+                            row.find('.price').val(resp.data);
+                            row.find('.price-readonly').val(formatRupiah(resp.data));
+                        }
+                    },
+                    error: function(request, status, error) {
+                        if (request.status == 422) {
+                            return responseFailed(request.responseJSON.message);
+                        } else if (request.status == 419) {
+                            return sessionTimeOut();
+                        } else {
+                            return responseInternalServerError();
+                        }
+                    },
+                    complete: function() {
+                        return closeLoader();
+                    }
+                })
+            }else{
+                row.find('.price').val('');
+            }
         }
     })
 </script>

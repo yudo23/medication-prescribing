@@ -9,7 +9,7 @@
             </div>
             <form method="get" action="#" id="frmFilter">
                 <div class="modal-body">
-                    <div class="form-group">
+                     <div class="form-group">
                         <label>Pencarian</label>
                         <input type="text" class="form-control" placeholder="Pencarian..." value="{{request()->get('search')}}" name="search">
                     </div>
@@ -26,15 +26,6 @@
                                 <input type="date" class="form-control" placeholder="Sampai Tanggal" value="{{request()->get('to_date')}}" name="to_date">
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select class="form-control select2" name="status" style="width:100%;">
-                            <option value="">==Semua Status==</option>
-                            @foreach($status as $index => $row)
-                            <option value="{{$row}}" @if(request()->get('status') != "" && request()->get('status') == $row) selected @endif>{{$row}}</option>
-                            @endforeach
-                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">

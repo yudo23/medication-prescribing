@@ -1,6 +1,6 @@
 @extends("dashboard.layouts.main")
 
-@section("title","Pemeriksaan Pasien")
+@section("title","Pembayaran")
 
 @section("css")
 <style>
@@ -21,11 +21,11 @@
     <div class="col-sm-12">
         <div class="float-right page-breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Pemeriksaan Pasien</a></li>
-                <li class="breadcrumb-item active">Pemeriksaan Pasien</li>
+                <li class="breadcrumb-item"><a href="#">Pembayaran</a></li>
+                <li class="breadcrumb-item active">Pembayaran</li>
             </ol>
         </div>
-        <h5 class="page-title">Pemeriksaan Pasien</h5>
+        <h5 class="page-title">Pembayaran</h5>
     </div>
 </div>
 @endsection
@@ -39,11 +39,12 @@
                     <div class="col-lg-12 action">
                          @if(Auth::user()->hasRole([
                             \App\Enums\RoleEnum::ADMINISTRATOR,
+                            \App\Enums\RoleEnum::APOTEKER,
                         ]))
-                        <a href="{{route('dashboard.patient-records.create')}}" class="btn btn-primary btn-sm btn-add"><i class="fa fa-plus"></i> Tambah</a>
+                        <a href="{{route('dashboard.payments.create')}}" class="btn btn-primary btn-sm btn-add"><i class="fa fa-plus"></i> Tambah</a>
                         @endif
                         <a href="#" class="btn btn-warning btn-sm btn-filter"><i class="fa fa-filter"></i> Filter</a>
-                        <a href="{{route('dashboard.patient-records.index')}}" class="btn btn-secondary btn-sm"><i class="fa fa-refresh"></i> Refresh</a>
+                        <a href="{{route('dashboard.payments.index')}}" class="btn btn-secondary btn-sm"><i class="fa fa-refresh"></i> Refresh</a>
                     </div>
                 </div>
                 <div class="row">
@@ -54,15 +55,14 @@
                                     <thead>
                                         <th>Aksi</th>
                                         <th>No</th>
+                                        <th># Pembayaran</th>
                                         <th># Pemeriksaan</th>
-                                        <th>Tanggal</th>
                                         <th>Nama Pasien</th>
                                         <th>NIK</th>
-                                        <th>Jenis Kelamin</th>
-                                        <th>Keterangan</th>
-                                        <th>Resep Dokter</th>
-                                        <th>Total</th>
-                                        <th>Status</th>
+                                        <th>Tanggal Bayar</th>
+                                        <th>Nominal</th>
+                                        <th>Dokter</th>
+                                        <th>Apoteker</th>
                                     </thead>
                                     <tbody>
                                         @forelse ($table as $index => $row)
@@ -73,37 +73,27 @@
                                                         <i class="fa fa-bars"></i>
                                                     </button>
                                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                        <a href="{{route('dashboard.patient-records.show',$row->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> Show</a>
-                                                        @if($row->canUpdate())
-                                                        <a href="{{route('dashboard.patient-records.edit',$row->id)}}" class="dropdown-item"><i class="fa fa-edit"></i> Edit</a>
-                                                        @endif
-                                                        @if($row->canPrintInvoice())
-                                                        <a href="{{route('dashboard.patient-records.print-invoice',$row->id)}}" class="dropdown-item"><i class="fa fa-print"></i> Cetak Invoice</a>
-                                                        @endif
+                                                        <a href="{{route('dashboard.payments.show',$row->id)}}" class="dropdown-item"><i class="fa fa-eye"></i> Show</a>
                                                         @if($row->canDelete())
                                                         <a href="#" class="dropdown-item btn-delete" data-id="{{$row->id}}"><i class="fa fa-trash"></i> Hapus</a>
+                                                        @endif
+                                                        @if($row->canDelete())
+                                                        <a href="{{route('dashboard.payments.print-receipt',$row->id)}}"  class="dropdown-item"><i class="fa fa-print"></i> Cetak Kwitansi</a>
                                                         @endif
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>{{$table->firstItem() + $index}}</td>
                                             <td>{{$row->code}}</td>
-                                            <td>{{\Carbon\Carbon::parse($row->examined_date)->translatedFormat("d F Y")}}</td>
-                                            <td>{{$row->name}}</td>
-                                            <td>{{$row->nik}}</td>
-                                            <td>{{$row->gender}}</td>
-                                            <td>{{$row->note }}</td>
                                             <td>
-                                                <ul>
-                                                    @foreach($row->prescriptions as $p)
-                                                    <li>{{$p->medicine_name}} ({{$p->qty}})</li>
-                                                    @endforeach
-                                                </ul>
+                                                <a href="{{route('dashboard.patient-records.show',$row->record_id)}}">{{$row->record->code ?? null}}</a>
                                             </td>
-                                            <td>{{number_format($row->total(),0,',','.')}}</td>
-                                            <td>
-                                                <span class="badge badge-{{$row->status()->class ?? null}}">{{$row->status()->msg ?? null}}</span>
-                                            </td>
+                                            <td>{{$row->record->name ?? null}}</td>
+                                            <td>{{$row->record->nik ?? null}}</td>
+                                            <td>{{\Carbon\Carbon::parse($row->date)->translatedFormat("d F Y")}}</td>
+                                            <td>{{number_format($row->amount)}}</td>
+                                            <td>{{$row->record->doctor->name ?? null}}</td>
+                                            <td>{{$row->apoteker->name ?? null}}</td>
                                         </tr>
                                         @empty
                                         <tr>
@@ -122,7 +112,7 @@
     </div>
 </div>
 
-@include("dashboard.patient-records.modal.index")
+@include("dashboard.payments.modal.index")
 
 <form id="frmDelete" method="POST">
     @csrf
@@ -139,7 +129,7 @@
             e.preventDefault();
 
             $('#modalFilterLabel').html("Filter Pencarian");
-            $("#frmFilter").attr("action", "{{ route('dashboard.patient-records.index') }}");
+            $("#frmFilter").attr("action", "{{ route('dashboard.payments.index') }}");
             $("#modalFilter").modal("show");
         });
 
@@ -148,7 +138,7 @@
 
             let id = $(this).data("id");
             if (confirm("Apakah anda yakin ingin menghapus data ini ?")) {
-                $("#frmDelete").attr("action", "{{ route('dashboard.patient-records.destroy', '_id_') }}".replace("_id_", id));
+                $("#frmDelete").attr("action", "{{ route('dashboard.payments.destroy', '_id_') }}".replace("_id_", id));
                 $("#frmDelete").find('input[name="id"]').val(id);
                 $("#frmDelete").submit();
             }

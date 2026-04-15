@@ -40,9 +40,9 @@ class MedicineController extends Controller
     public function price($id, Request $request)
     {
         try {
-            $date = $request->examined_date;
+            $examined_date = $request->examined_date;
 
-            if (!$date) {
+            if (!$examined_date) {
                 return ResponseHelper::apiResponse(false, "Tanggal wajib diisi", null);
             }
 
@@ -54,7 +54,7 @@ class MedicineController extends Controller
 
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token
-            ])->get("http://recruitment.rsdeltasurya.com/api/v1/medicines/{$id}/prices");
+            ])->get("https://recruitment.rsdeltasurya.com/api/v1/medicines/{$id}/prices");
 
             if ($response->failed()) {
                 return ResponseHelper::apiResponse(false, "Gagal ambil harga", null);
@@ -68,9 +68,9 @@ class MedicineController extends Controller
                 $start = $item['start_date']['value'] ?? null;
                 $end   = $item['end_date']['value'] ?? null;
 
-                if ($start && $date >= $start) {
-                    if (!$end || $date <= $end) {
-                        $selectedPrice = $item['unit_price'];
+                if ($start && $examined_date >= $start) {
+                    if (!$end || $examined_date <= $end) {
+                        $selectedPrice = floatval($item['unit_price']);
                     }
                 }
             }

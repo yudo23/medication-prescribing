@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('patient_records', function (Blueprint $table) {
             $table->id();
+            $table->string("code",255)->nullable();
             $table->string("name",255);
             $table->string("nik",255);
             $table->char("gender",1);
             $table->date("date_of_birth");
             $table->unsignedBigInteger("doctor_id");
-            $table->date("examined_at");
+            $table->date("examined_date");
             $table->decimal('height',16,4)->nullable();
             $table->decimal('weight',16,4)->nullable();
             $table->decimal('systole',16,4)->nullable();

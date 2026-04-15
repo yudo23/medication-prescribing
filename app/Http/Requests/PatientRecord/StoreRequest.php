@@ -73,6 +73,25 @@ class StoreRequest extends FormRequest
                 'file',
                 'max:2048',
             ],
+            'repeater' => [
+                'required',
+                'array',
+            ],
+            'repeater.*.medicine_name' => [
+                'required',
+            ],
+            'repeater.*.medicine_id' => [
+                'required',
+            ],
+            'repeater.*.price' => [
+                'required',
+                'numeric',
+            ],
+            'repeater.*.qty' => [
+                'required',
+                'numeric',
+                'min:1',
+            ],
         ];
     }
 
@@ -97,6 +116,15 @@ class StoreRequest extends FormRequest
             'temperature.numeric' => 'Suhu tubuh harus berupa angka',
             'attachment.file' => 'File lampiran harus berupa file yang valid',
             'attachment.max' => 'Ukuran file maksimal 2MB',
+            'repeater.required' => 'Obat wajib diisi minimal 1 item',
+            'repeater.array' => 'Data obat tidak valid',
+            'repeater.*.medicine_name.required' => 'Obat wajib dipilih',
+            'repeater.*.medicine_id.required' => 'Obat wajib dipilih',
+            'repeater.*.price.required' => 'Harga obat wajib diisi',
+            'repeater.*.price.numeric' => 'Harga obat harus berupa angka',
+            'repeater.*.qty.required' => 'Qty wajib diisi',
+            'repeater.*.qty.numeric' => 'Qty harus berupa angka',
+            'repeater.*.qty.min' => 'Qty minimal 1',
         ];
     }
 

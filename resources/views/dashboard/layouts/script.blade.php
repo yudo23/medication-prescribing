@@ -100,5 +100,26 @@
 			return location.href = '{{route("dashboard.auth.login.index")}}';
 		})
 	}
+
+	function formatRupiah(value) {
+		if (value === null || value === undefined || value === '') return '';
+
+		let str = value.toString().replace(/[^0-9.]/g, '');
+
+		let parts = str.split('.');
+		let integerPart = parts[0];
+		let decimalPart = parts[1];
+		let sisa = integerPart.length % 3;
+		let rupiah = integerPart.substr(0, sisa);
+		let ribuan = integerPart.substr(sisa).match(/\d{3}/g);
+
+		if (ribuan) {
+			rupiah += (sisa ? '.' : '') + ribuan.join('.');
+		}
+
+		return decimalPart !== undefined
+			? rupiah + ',' + decimalPart
+			: rupiah;
+	}
 </script>
 @yield("script")

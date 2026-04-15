@@ -47,16 +47,6 @@ class LoginController extends Controller
 
             alert()->html('Berhasil', $response->message, 'success');
 
-            if (Auth::user()->hasRole([
-                RoleEnum::SUPERADMIN,
-                RoleEnum::OWNER,
-                RoleEnum::ADMINISTRATOR,
-                RoleEnum::MARKETING,
-                RoleEnum::FINANCE,
-            ])) {
-                return redirect()->intended(route('user.index'));
-            }
-
             return redirect()->intended(route('dashboard.index'));
         } catch (\Throwable $th) {
             Log::emergency($th->getMessage());

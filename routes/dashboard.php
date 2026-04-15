@@ -50,6 +50,7 @@ Route::group(['middleware' => ['auth', 'dashboard.access']], function () {
     });
 
     Route::group(["as" => "patient-records.", "prefix" => "patient-records"], function () {
+        Route::get('/{Id}/print-invoice', 'PatientRecordController@printInvoice')->name("print-invoice")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::DOKTER])]);
         Route::get('/', 'PatientRecordController@index')->name("index")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::DOKTER,RoleEnum::APOTEKER])]);
         Route::get('/create', 'PatientRecordController@create')->name("create")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::DOKTER])]);
         Route::get('/{id}', 'PatientRecordController@show')->name("show")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::DOKTER,RoleEnum::APOTEKER])]);
@@ -57,5 +58,14 @@ Route::group(['middleware' => ['auth', 'dashboard.access']], function () {
         Route::post('/', 'PatientRecordController@store')->name("store")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::DOKTER])]);
         Route::put('/{id}', 'PatientRecordController@update')->name("update")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::DOKTER])]);
         Route::delete('/{id}', 'PatientRecordController@destroy')->name("destroy")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::DOKTER])]);
+    });
+
+     Route::group(["as" => "payments.", "prefix" => "payments"], function () {
+        Route::get('/{Id}/print-receipt', 'PaymentController@printReceipt')->name("print-receipt")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::APOTEKER])]);
+        Route::get('/', 'PaymentController@index')->name("index")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::APOTEKER])]);
+        Route::get('/create', 'PaymentController@create')->name("create")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::APOTEKER])]);
+        Route::get('/{id}', 'PaymentController@show')->name("show")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::APOTEKER])]);
+        Route::post('/', 'PaymentController@store')->name("store")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR,RoleEnum::APOTEKER])]);
+        Route::delete('/{id}', 'PaymentController@destroy')->name("destroy")->middleware(['role:' . implode('|', [RoleEnum::ADMINISTRATOR])]);
     });
 });

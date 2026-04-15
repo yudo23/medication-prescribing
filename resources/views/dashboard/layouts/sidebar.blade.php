@@ -5,8 +5,7 @@
 
     <div class="left-side-logo d-block d-lg-none">
         <div class="text-center">
-
-            <a href="{{route('dashboard.index')}}" class="logo"><img src="{{URL::to('/')}}/templates/dashboard/assets/images/logo-dark.png" height="20" alt="logo"></a>
+            <a href="{{route('dashboard.index')}}" class="logo text-white">{{Auth::user()->getRoleNames()->implode(', ') }}</a>
         </div>
     </div>
 
@@ -22,6 +21,13 @@
                         <span> Dashboard</span>
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{route('dashboard.payments.index')}}" class="waves-effect">
+                        <i class="fa fa-money"></i>
+                        <span> Pembayaran</span>
+                    </a>
+                </li> 
 
                 <li>
                     <a href="{{route('dashboard.patient-records.index')}}" class="waves-effect">

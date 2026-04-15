@@ -10,6 +10,7 @@ use App\Helpers\LogHelper;
 use App\Enums\LogUserEnum;
 use App\Enums\PatientRecordEnum;
 use App\Models\PatientRecord;
+use App\Models\PatientRecordPrescription;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Log;
@@ -19,25 +20,40 @@ use DB;
 class PatientRecordService extends BaseService
 {
     protected $patientRecord;
+    protected $patientRecordPrescription;
 
     public function __construct()
     {
         $this->patientRecord = new PatientRecord();
+        $this->patientRecordPrescription = new PatientRecordPrescription();
     }
 
     public function index(Request $request, bool $paginate = true)
     {
         $search = (empty($request->search)) ? null : trim(strip_tags($request->search));
+        $from_date = (empty($request->from_date)) ? null : trim(strip_tags($request->from_date));
+        $to_date = (empty($request->to_date)) ? null : trim(strip_tags($request->to_date));
+        $status = (!isset($request->status)) ? null : trim(strip_tags($request->status));
 
         $table = $this->patientRecord;
         if (!empty($search)) {
             $table = $table->where(function ($query2) use ($search) {
                 $query2->where('name', 'like', '%' . $search . '%');
+                $query2->orWhere('code', 'like', '%' . $search . '%');
                 $query2->orWhere('nik', 'like', '%' . $search . '%');
             });
         }
-        $table = $table->with(["doctor"]);
-        $table = $table->orderBy('created_at', 'DESC');
+        if(!empty($from_date)){
+        	$table = $table->whereDate("examined_date",">=",$from_date);
+        }
+        if(!empty($to_date)){
+        	$table = $table->whereDate("examined_date",">=",$to_date);
+        }
+        if(isset($status)){
+            $table = $table->where("status",$status);
+        }
+        $table = $table->with(["doctor","prescriptions"]);
+        $table = $table->orderBy('examined_date', 'DESC');
 
         if ($paginate) {
             $table = $table->paginate(10);
@@ -54,7 +70,7 @@ class PatientRecordService extends BaseService
         try {
             $result = $this->patientRecord;
             $result = $result->where("id", $id);
-            $result = $result->with(["doctor"]);
+            $result = $result->with(["doctor","prescriptions"]);
             $result = $result->first();
 
             if (!$result) {
@@ -78,7 +94,7 @@ class PatientRecordService extends BaseService
             $gender = (empty($request->gender)) ? null : trim(strip_tags($request->gender));
             $date_of_birth = (empty($request->date_of_birth)) ? null : trim(strip_tags($request->date_of_birth));
             $doctor_id = (empty($request->doctor_id)) ? null : trim(strip_tags($request->doctor_id));
-            $examined_at = (empty($request->examined_at)) ? null : trim(strip_tags($request->examined_at));
+            $examined_date = (empty($request->examined_date)) ? null : trim(strip_tags($request->examined_date));
             $height = (!isset($request->height)) ? null : trim(strip_tags($request->height));
             $weight = (!isset($request->weight)) ? null : trim(strip_tags($request->weight));
             $systole = (!isset($request->systole)) ? null : trim(strip_tags($request->systole));
@@ -88,6 +104,7 @@ class PatientRecordService extends BaseService
             $temperature = (!isset($request->temperature)) ? null : trim(strip_tags($request->temperature));
             $note = (!isset($request->note)) ? null : trim(strip_tags($request->note));
             $attachment = $request->file("attachment");
+            $repeater = $request->repeater;
 
             if ($attachment) {
                 $upload = UploadHelper::upload_file($attachment, 'patient-records');
@@ -105,7 +122,7 @@ class PatientRecordService extends BaseService
                 'gender' => $gender,
                 'date_of_birth' => $date_of_birth,
                 'doctor_id' => $doctor_id,
-                'examined_at' => $examined_at,
+                'examined_date' => $examined_date,
                 'height' => $height,
                 'weight' => $weight,
                 'systole' => $systole,
@@ -118,11 +135,26 @@ class PatientRecordService extends BaseService
                 'status' => PatientRecordEnum::STATUS_UNPAID
             ]);
 
+            $create->update([
+              'code' => sprintf("INV%06d", $create->id)  
+            ]);
+
+            foreach($repeater as $row){
+                $this->patientRecordPrescription->create([
+                    "record_id" => $create->id,
+                    "medicine_id" => $row["medicine_id"] ?? null,
+                    "medicine_name" => $row["medicine_name"] ?? 0,
+                    "price" => $row["price"] ?? 0,
+                    "qty" => $row["qty"] ?? 0,
+                    "note" => $row["note"] ?? null,
+                ]);
+            }
+
             LogHelper::log(
                 PatientRecord::class,
                 $create->id,
                 LogUserEnum::INSERT,
-                'Tambah pemeriksaan pasien : ' . $nik
+                'Tambah pemeriksaan #' . $create->code
             );
 
             DB::commit();
@@ -145,7 +177,7 @@ class PatientRecordService extends BaseService
             $gender = (empty($request->gender)) ? null : trim(strip_tags($request->gender));
             $date_of_birth = (empty($request->date_of_birth)) ? null : trim(strip_tags($request->date_of_birth));
             $doctor_id = (empty($request->doctor_id)) ? null : trim(strip_tags($request->doctor_id));
-            $examined_at = (empty($request->examined_at)) ? null : trim(strip_tags($request->examined_at));
+            $examined_date = (empty($request->examined_date)) ? null : trim(strip_tags($request->examined_date));
             $height = (!isset($request->height)) ? null : trim(strip_tags($request->height));
             $weight = (!isset($request->weight)) ? null : trim(strip_tags($request->weight));
             $systole = (!isset($request->systole)) ? null : trim(strip_tags($request->systole));
@@ -155,9 +187,14 @@ class PatientRecordService extends BaseService
             $temperature = (!isset($request->temperature)) ? null : trim(strip_tags($request->temperature));
             $note = (!isset($request->note)) ? null : trim(strip_tags($request->note));
             $attachment = $request->file("attachment");
+            $repeater = $request->repeater;
 
             $result = $this->patientRecord;
             $result = $result->findOrFail($id);
+
+            if(!$result->canUpdate()){
+                return $this->response(false, "Status tidak valid");
+            }
 
             if ($attachment) {
                 $upload = UploadHelper::upload_file($attachment, 'patient-records');
@@ -177,7 +214,7 @@ class PatientRecordService extends BaseService
                 'gender' => $gender,
                 'date_of_birth' => $date_of_birth,
                 'doctor_id' => $doctor_id,
-                'examined_at' => $examined_at,
+                'examined_date' => $examined_date,
                 'height' => $height,
                 'weight' => $weight,
                 'systole' => $systole,
@@ -189,11 +226,25 @@ class PatientRecordService extends BaseService
                 'attachment' => $attachment,
             ]);
 
+            $deletPrescriptions = $this->patientRecordPrescription->where("record_id",$id);
+            $deletPrescriptions = $deletPrescriptions->delete();
+
+            foreach($repeater as $row){
+                $this->patientRecordPrescription->create([
+                    "record_id" => $id,
+                    "medicine_id" => $row["medicine_id"] ?? null,
+                    "medicine_name" => $row["medicine_name"] ?? 0,
+                    "price" => $row["price"] ?? 0,
+                    "qty" => $row["qty"] ?? 0,
+                    "note" => $row["note"] ?? null,
+                ]);
+            }
+
             LogHelper::log(
                 PatientRecord::class,
                 $id,
                 LogUserEnum::UPDATE,
-                "Ubah pemeriksaan pasien : ".$nik
+                "Ubah pemeriksaan #".$result->code
             );
 
             DB::commit();
@@ -213,11 +264,15 @@ class PatientRecordService extends BaseService
         try {
             $result = $this->patientRecord->findOrFail($id);
 
+            if(!$result->canDelete()){
+                return $this->response(false, "Status tidak valid");
+            }
+
             LogHelper::log(
                 PatientRecord::class,
                 $id,
                 LogUserEnum::DELETE,
-                'Hapus pemeriksaan pasien : ' . $result->nik
+                'Hapus pemeriksaan #' . $result->code
             );
 
             $result->delete();

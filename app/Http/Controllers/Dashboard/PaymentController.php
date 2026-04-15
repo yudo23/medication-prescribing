@@ -7,42 +7,41 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Helpers\ResponseHelper;
-use App\Http\Requests\PatientRecord\StoreRequest;
-use App\Http\Requests\PatientRecord\UpdateRequest;
-use App\Services\PatientRecordService;
+use App\Http\Requests\Payment\StoreRequest;
+use App\Services\PaymentService;
 use App\Services\UserService;
 use App\Enums\RoleEnum;
+use App\Services\PatientRecordService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Log;
 
-class PatientRecordController extends Controller
+class PaymentController extends Controller
 {
     protected $route;
     protected $view;
-    protected $patientRecordService;
+    protected $paymentService;
     protected $userService;
+    protected $patientRecordService;
 
     public function __construct()
     {
-        $this->route = "dashboard.patient-records.";
-        $this->view = "dashboard.patient-records.";
-        $this->patientRecordService = new PatientRecordService();
+        $this->route = "dashboard.payments.";
+        $this->view = "dashboard.payments.";
+        $this->paymentService = new PaymentService();
         $this->userService = new UserService();
+        $this->patientRecordService = new PatientRecordService();
     }
 
     public function index(Request $request)
     {
-        $response = $this->patientRecordService->index($request);
+        $response = $this->paymentService->index($request);
 
-        $doctors = $this->userService->index(new Request(["roles" => [RoleEnum::DOKTER]]),false);
-        $doctors = $doctors->data;
-
-        $status = PatientRecordEnum::status();
+        $apotekers = $this->userService->index(new Request(["roles" => [RoleEnum::APOTEKER]]),false);
+        $apotekers = $apotekers->data;
 
         $data = [
             'table' => $response->data,
-            'doctors' => $doctors,
-            'status' => $status,
+            'apotekers' => $apotekers,
         ];
 
         return view($this->view . 'index', $data);
@@ -50,11 +49,15 @@ class PatientRecordController extends Controller
 
     public function create()
     {
-        $doctors = $this->userService->index(new Request(["roles" => [RoleEnum::DOKTER]]),false);
-        $doctors = $doctors->data;
+        $apotekers = $this->userService->index(new Request(["roles" => [RoleEnum::APOTEKER]]),false);
+        $apotekers = $apotekers->data;
+
+        $records = $this->patientRecordService->index(new Request(["status" => PatientRecordEnum::STATUS_UNPAID]),false);
+        $records = $records->data;
 
         $data = [
-            'doctors' => $doctors
+            'apotekers' => $apotekers,
+            'records' => $records,
         ];
 
         return view($this->view . "create",$data);
@@ -62,7 +65,7 @@ class PatientRecordController extends Controller
 
     public function show($id)
     {
-        $result = $this->patientRecordService->show($id);
+        $result = $this->paymentService->show($id);
         if (!$result->success) {
             alert()->error('Gagal', $result->message);
             return redirect()->route($this->route . 'index')->withInput();
@@ -76,46 +79,10 @@ class PatientRecordController extends Controller
         return view($this->view . "show", $data);
     }
 
-    public function edit($id)
-    {
-        $result = $this->patientRecordService->show($id);
-        if (!$result->success) {
-            alert()->error('Gagal', $result->message);
-            return redirect()->route($this->route . 'index')->withInput();
-        }
-        $result = $result->data;
-
-        $doctors = $this->userService->index(new Request(["roles" => [RoleEnum::DOKTER]]),false);
-        $doctors = $doctors->data;
-
-        $data = [
-            'result' => $result,
-            'doctors' => $doctors
-        ];
-
-        return view($this->view . "edit", $data);
-    }
-
     public function store(StoreRequest $request)
     {
         try {
-            $response = $this->patientRecordService->store($request);
-            if (!$response->success) {
-                return ResponseHelper::apiResponse(false, $response->message , null, null, $response->code);
-            }
-
-            return ResponseHelper::apiResponse(true, $response->message , $response->data , null, $response->code);
-        } catch (\Throwable $th) {
-            Log::emergency($th->getMessage());
-
-            return ResponseHelper::apiResponse(false, $th->getMessage() , null, null, Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function update(UpdateRequest $request, $id)
-    {
-        try {
-            $response = $this->patientRecordService->update($request, $id);
+            $response = $this->paymentService->store($request);
             if (!$response->success) {
                 return ResponseHelper::apiResponse(false, $response->message , null, null, $response->code);
             }
@@ -131,7 +98,7 @@ class PatientRecordController extends Controller
     public function destroy($id)
     {
         try {
-            $response = $this->patientRecordService->delete($id);
+            $response = $this->paymentService->delete($id);
             if (!$response->success) {
                 alert()->error('Gagal', $response->message);
                 return redirect()->route($this->route . 'index')->withInput();
@@ -147,9 +114,9 @@ class PatientRecordController extends Controller
         }
     }
 
-    public function printInvoice($id)
+    public function printReceipt($id)
     {
-        $result = $this->patientRecordService->show($id);
+        $result = $this->paymentService->show($id);
         if (!$result->success) {
             alert()->error('Gagal', $result->message);
             return redirect()->route($this->route . 'index')->withInput();
@@ -160,7 +127,7 @@ class PatientRecordController extends Controller
             'result' => $result,
         ];
 
-        $pdf = Pdf::loadview($this->view . 'print-invoice', $data)->setPaper('a4', 'potrait');
+        $pdf = Pdf::loadview($this->view . 'print-receipt', $data)->setPaper('a4', 'potrait');
 
         return $pdf->stream();
     }
