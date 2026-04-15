@@ -60,13 +60,7 @@ php artisan db:seed
 php artisan storage:link
 ```
 
-### 6. Install Frontend (Jika menggunakan Vite)
-```bash
-npm install
-npm run dev
-```
-
-### 7. Jalankan Aplikasi
+### 6. Jalankan Aplikasi
 ```bash
 php artisan serve
 ```
