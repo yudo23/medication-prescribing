@@ -13,7 +13,7 @@ Aplikasi web untuk manajemen pemeriksaan pasien dan peresepan obat, dengan role 
 
 ## Repository
 ```bash
-git clone https://github.com/yudo23/medication-prescribing
+Clone project di https://github.com/yudo23/medication-prescribing
 cd medication-prescribing
 ```
 
