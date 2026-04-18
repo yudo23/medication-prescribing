@@ -57,7 +57,7 @@ class ProfileService extends BaseService
             $avatar = $request->file("avatar");
 
             if ($avatar) {
-                $upload = UploadHelper::upload_file($avatar, 'users', ImageEnum::EXT, 2097152, true, true, 500, null, true);
+                $upload = UploadHelper::upload_file($avatar, 'users', ImageEnum::EXT);
 
                 if ($upload["IsError"] == TRUE) {
                     return $this->response(false, $upload["Message"]);
